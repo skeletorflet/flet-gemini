@@ -1,8 +1,8 @@
 name: flet_gemini
 description: Flet FletGemini control
-repository: https://github.com/MyGithubAccount/flet-gemini/src/flutter/flet_gemini
+repository: https://github.com/skeletorflet/flet-gemini/src/flutter/flet_gemini
 version: 0.1.0
-homepage: https://github.com/MyGithubAccount/flet-gemini
+homepage: https://github.com/skeletorflet/flet-gemini
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

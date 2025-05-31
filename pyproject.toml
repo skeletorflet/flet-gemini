@@ -13,9 +13,9 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://mydomain.dev"
-Documentation = "https://github.com/MyGithubAccount/flet-gemini"
-Repository = "https://github.com/MyGithubAccount/flet-gemini"
-Issues = "https://github.com/MyGithubAccount/flet-gemini/issues"
+Documentation = "https://github.com/skeletorflet/flet-gemini"
+Repository = "https://github.com/skeletorflet/flet-gemini"
+Issues = "https://github.com/skeletorflet/flet-gemini/issues"
 
 [tool.setuptools.package-data]
 "flutter.flet_gemini" = ["**/*"]

@@ -11,7 +11,7 @@ Link to git repository:
 
 ```
 dependencies = [
-  "flet-gemini @ git+https://github.com/MyGithubAccount/flet-gemini",
+  "flet-gemini @ git+https://github.com/skeletorflet/flet-gemini",
   "flet>=0.28.3",
 ]
 ```
@@ -34,4 +34,4 @@ flet build macos -v
 
 ## Documentation
 
-[Link to documentation](https://MyGithubAccount.github.io/flet-gemini/)
+[Link to documentation](https://skeletorflet.github.io/flet-gemini/)
