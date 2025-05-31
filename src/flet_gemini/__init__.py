@@ -1,1 +1,1 @@
-from flet_gemini.flet_gemini import FletGemini
+from flet_gemini.flet_gemini import FletGemini, SafetyCategory, SafetyThreshold
