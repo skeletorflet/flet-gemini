@@ -1,0 +1,7 @@
+site_name: FletGemini
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings
