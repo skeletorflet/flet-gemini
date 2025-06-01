@@ -54,6 +54,26 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
   }
 
   @override
+  void didUpdateWidget(FletGeminiControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final String? currentApiKey = widget.control.attrString("api_key", null);
+    final String? oldApiKey = oldWidget.control.attrString("api_key", null);
+
+    if (currentApiKey != oldApiKey) {
+      _response = "";
+      _isLoading = false;
+      _error = null;
+      _streamSubscription?.cancel();
+      _streamSubscription = null;
+
+      if (currentApiKey != null && currentApiKey.isNotEmpty) {
+        _loadConfiguration();
+        _initializeGemini(currentApiKey);
+      }
+    }
+  }
+
+  @override
   void dispose() {
     widget.backend.unsubscribeMethods(widget.control.id);
     _streamSubscription?.cancel();
@@ -99,7 +119,8 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
         generationConfig: _generationConfig,
       );
     } catch (e) {
-      _triggerError("Error initializing Gemini: $e");
+      String errorMsg = _formatApiKeyError(e);
+      _triggerError(errorMsg);
     }
   }
 
@@ -148,12 +169,29 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
     _systemPrompt = widget.control.attrString("system_prompt", null);
   }
 
+  bool _isApiKeyError(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+    return errorString.contains("api key not valid") ||
+        errorString.contains("api_key_invalid") ||
+        errorString.contains("invalid_argument") ||
+        errorString.contains("status code of 400") ||
+        errorString.contains("validatestatus") ||
+        errorString.contains("400");
+  }
+
+  String _formatApiKeyError(dynamic error) {
+    if (_isApiKeyError(error)) {
+      return "ERROR_API_KEY_INVALID: API key not valid. Please pass a valid API key.";
+    }
+    return "Error: $error";
+  }
+
   Future<String?> _handleInit(String apiKey) async {
     try {
       _initializeGemini(apiKey);
       return "Gemini initialized successfully";
     } catch (e) {
-      return "Error initializing Gemini: $e";
+      return _formatApiKeyError(e);
     }
   }
 
@@ -172,7 +210,8 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
       _triggerResponse(output);
       return output;
     } catch (e) {
-      final errorMsg = "Error: $e";
+      // Captura específicamente los errores de API key y HTTP 400
+      String errorMsg = _formatApiKeyError(e);
       _triggerError(errorMsg);
       return errorMsg;
     }
@@ -205,7 +244,7 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
       _triggerChatResponse(output);
       return output;
     } catch (e) {
-      final errorMsg = "Error in chat: $e";
+      String errorMsg = _formatApiKeyError(e);
       _triggerError(errorMsg);
       return errorMsg;
     }
@@ -246,7 +285,7 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
 
       return "Stream started";
     } catch (e) {
-      final errorMsg = "Error starting stream: $e";
+      String errorMsg = _formatApiKeyError(e);
       _triggerError(errorMsg);
       return errorMsg;
     }
@@ -260,8 +299,6 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
       final count = await Gemini.instance.countTokens(
         text,
         modelName: args["model"],
-        // safetySettings: _safetySettings,
-        // generationConfig: _generationConfig,
       );
 
       return count?.toString() ?? "0";
@@ -338,8 +375,6 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
       final embeddings = await Gemini.instance.batchEmbedContents(
         texts,
         modelName: args["model"] ?? "embedding-001",
-        // safetySettings: _safetySettings,
-        // generationConfig: _generationConfig,
       );
 
       if (embeddings == null) {
@@ -382,15 +417,11 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
           .map((img) => Uint8List.fromList(List<int>.from(img)))
           .toList();
 
-      // Crear las partes para el prompt
       List<Part> parts = [Part.text(text)];
-
-      // Agregar cada imagen como Part.bytes
       for (Uint8List imageBytes in images) {
         parts.add(Part.bytes(imageBytes));
       }
 
-      // Usar prompt en lugar de textAndImage
       final response = await Gemini.instance.prompt(
         parts: parts,
         model: args["model"],
@@ -398,12 +429,11 @@ class _FletGeminiControlState extends State<FletGeminiControl> {
         generationConfig: _generationConfig,
       );
 
-      // Usar response?.output como en el ejemplo que funciona
       final output = response?.output ?? "No response";
       _triggerResponse(output);
       return output;
     } catch (e) {
-      final errorMsg = "Error with text and image: $e";
+      String errorMsg = _formatApiKeyError(e);
       _triggerError(errorMsg);
       return errorMsg;
     }
